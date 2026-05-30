@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificate Vault</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #080a0f;
+  --surface:   #0f1117;
+  --surface2:  #161820;
+  --surface3:  #1c1f2a;
+  --border:    rgba(255,255,255,0.06);
+  --border2:   rgba(255,255,255,0.1);
+  --gold:      #d4a843;
+  --gold-lt:   #f0c96a;
+  --gold-dim:  rgba(212,168,67,0.10);
+  --gold-dim2: rgba(212,168,67,0.18);
+  --text:      #eceae3;
+  --muted:     #7a7870;
+  --dim:       #3a3835;
+  --r:         12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body {
+  background:var(--bg);color:var(--text);
+  font-family:'Outfit',sans-serif;font-weight:300;
+  min-height:100vh;overflow-x:hidden;
+}
+body::before {
+  content:'';position:fixed;inset:0;
+  background-image:radial-gradient(rgba(212,168,67,0.07) 1px,transparent 1px);
+  background-size:28px 28px;pointer-events:none;z-index:0;
+}
+body::after {
+  content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);
+  width:600px;height:400px;
+  background:radial-gradient(ellipse,rgba(212,168,67,0.06) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+.wrap{max-width:1100px;margin:0 auto;padding:0 28px;position:relative;z-index:1;}
+header{padding:52px 0 36px;border-bottom:1px solid var(--border);margin-bottom:44px;}
+.header-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.brand{display:flex;align-items:center;gap:14px;}
+.brand-icon{
+  width:44px;height:44px;border-radius:10px;
+  background:var(--gold-dim2);border:1px solid rgba(212,168,67,0.3);
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
+}
+h1{font-family:'Cormorant Garamond',serif;font-size:clamp(26px,4vw,38px);font-weight:600;letter-spacing:-0.01em;line-height:1;}
+h1 em{color:var(--gold);font-style:normal;}
+.subtitle{font-size:13px;color:var(--muted);margin-top:5px;letter-spacing:0.02em;}
+.header-stats{display:flex;gap:28px;}
+.stat{text-align:right;}
+.stat-n{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;color:var(--gold);line-height:1;}
+.stat-l{font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:3px;}
+.controls{display:flex;gap:10px;margin-bottom:32px;flex-wrap:wrap;align-items:center;}
+.search-wrap{flex:1;min-width:180px;position:relative;}
+.search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:0.35;pointer-events:none;}
+.search-wrap input{
+  width:100%;background:var(--surface);border:1px solid var(--border);
+  color:var(--text);padding:11px 14px 11px 38px;border-radius:var(--r);
+  font-family:'Outfit',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;
+}
+.search-wrap input:focus{border-color:rgba(212,168,67,0.5);}
+.search-wrap input::placeholder{color:var(--dim);}
+.filters{display:flex;gap:7px;flex-wrap:wrap;}
+.fb{
+  padding:7px 15px;border-radius:20px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;
+  font-size:11px;font-weight:500;cursor:pointer;letter-spacing:0.05em;
+  transition:all 0.18s;white-space:nowrap;
+}
+.fb:hover{border-color:var(--gold);color:var(--gold);}
+.fb.on{background:var(--gold-dim2);border-color:var(--gold);color:var(--gold-lt);}
+.section-head{
+  font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);
+}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:44px;}
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;cursor:pointer;transition:all 0.22s ease;
+  animation:fadeUp 0.4s ease both;position:relative;
+}
+.card::after{
+  content:'';position:absolute;inset:0;border-radius:var(--r);
+  box-shadow:0 0 0 1px rgba(212,168,67,0);transition:box-shadow 0.22s;pointer-events:none;
+}
+.card:hover{transform:translateY(-3px);background:var(--surface2);}
+.card:hover::after{box-shadow:0 0 0 1px rgba(212,168,67,0.35);}
+.card-bar{height:2.5px;width:100%;opacity:0.7;}
+.card-body{padding:18px;}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:13px;}
+.cat-pill{
+  font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;
+  padding:3px 9px;border-radius:20px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);
+}
+.card-year{font-size:11px;color:var(--muted);}
+.card-icon{font-size:26px;margin-bottom:10px;display:block;line-height:1;}
+.card-name{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;line-height:1.25;margin-bottom:5px;color:var(--text);}
+.card-issuer{font-size:11px;color:var(--muted);line-height:1.4;}
+.card-footer{display:flex;gap:8px;padding:12px 18px 14px;border-top:1px solid var(--border);}
+.btn-view,.btn-drive{
+  flex:1;padding:8px 6px;border-radius:8px;
+  font-family:'Outfit',sans-serif;font-size:11px;font-weight:500;
+  cursor:pointer;border:none;outline:none;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  transition:all 0.18s;letter-spacing:0.03em;text-decoration:none;
+}
+.btn-view{background:var(--gold-dim);border:1px solid rgba(212,168,67,0.2);color:var(--gold-lt);}
+.btn-view:hover{background:var(--gold-dim2);border-color:rgba(212,168,67,0.5);}
+.btn-drive{background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--muted);}
+.btn-drive:hover{background:rgba(255,255,255,0.07);color:var(--text);border-color:var(--border2);}
+
+/* lightbox */
+#lightbox{
+  display:none;position:fixed;inset:0;z-index:100;
+  background:rgba(4,5,8,0.92);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;animation:fadeIn 0.2s ease;
+}
+#lightbox.open{display:flex;}
+.lb-inner{
+  background:var(--surface);border:1px solid var(--border2);border-radius:16px;
+  width:min(820px,94vw);max-height:92vh;
+  display:flex;flex-direction:column;overflow:hidden;
+  animation:slideUp 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.7);
+}
+.lb-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding:20px 24px 16px;border-bottom:1px solid var(--border);gap:16px;flex-shrink:0;
+}
+.lb-meta{flex:1;min-width:0;}
+.lb-cat{font-size:9px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px;display:inline-block;}
+.lb-name{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-issuer{font-size:12px;color:var(--muted);margin-top:4px;}
+.lb-actions{display:flex;gap:8px;flex-shrink:0;margin-top:2px;align-items:flex-start;}
+.lb-btn-drive{
+  display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:9px;
+  background:var(--gold-dim2);border:1px solid rgba(212,168,67,0.35);color:var(--gold-lt);
+  font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;
+  cursor:pointer;text-decoration:none;white-space:nowrap;transition:all 0.18s;
+}
+.lb-btn-drive:hover{background:rgba(212,168,67,0.28);border-color:var(--gold);}
+.lb-close{
+  width:34px;height:34px;border-radius:8px;
+  background:rgba(255,255,255,0.05);border:1px solid var(--border);
+  color:var(--muted);font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s;flex-shrink:0;font-family:sans-serif;line-height:1;
+}
+.lb-close:hover{background:rgba(255,255,255,0.1);color:var(--text);}
+.lb-viewer{
+  flex:1;overflow:auto;min-height:0;background:var(--bg);
+  display:flex;align-items:flex-start;justify-content:center;
+}
+.lb-viewer embed,.lb-viewer iframe{width:100%;min-height:520px;height:70vh;border:none;display:block;}
+.lb-viewer img{max-width:100%;max-height:70vh;object-fit:contain;display:block;margin:auto;padding:16px;}
+.lb-nofile{padding:56px 24px;text-align:center;color:var(--muted);width:100%;}
+.lb-nofile .nf-icon{font-size:44px;margin-bottom:16px;opacity:0.4;}
+.lb-nofile p{font-size:13px;line-height:1.7;}
+.lb-nofile a{color:var(--gold);text-decoration:none;}
+.lb-nofile a:hover{text-decoration:underline;}
+.lb-nofile code{background:rgba(0,0,0,0.4);padding:1px 6px;border-radius:4px;font-size:11px;color:var(--gold);font-family:monospace;}
+.lb-nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 24px;border-top:1px solid var(--border);flex-shrink:0;gap:12px;
+}
+.lb-counter{font-size:12px;color:var(--muted);flex:1;text-align:center;}
+.lb-arrow{
+  width:32px;height:32px;border-radius:8px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  color:var(--muted);font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all 0.15s;
+}
+.lb-arrow:hover{background:rgba(255,255,255,0.08);color:var(--text);}
+.lb-arrow:disabled{opacity:0.25;cursor:default;}
+
+.empty{text-align:center;padding:72px 24px;color:var(--muted);}
+.empty .ei{font-size:44px;margin-bottom:16px;}
+.empty p{font-size:13px;}
+
+.setup-banner{
+  background:var(--gold-dim);border:1px solid rgba(212,168,67,0.18);
+  border-radius:var(--r);padding:18px 22px;margin-bottom:36px;
+  display:flex;gap:14px;align-items:flex-start;
+}
+.setup-banner .si{font-size:18px;flex-shrink:0;margin-top:1px;}
+.setup-banner h3{font-size:13px;font-weight:500;color:var(--gold-lt);margin-bottom:5px;}
+.setup-banner p{font-size:12px;color:var(--muted);line-height:1.7;}
+.setup-banner code{background:rgba(0,0,0,0.35);padding:1px 6px;border-radius:4px;font-size:11px;color:var(--gold);font-family:monospace;}
+
+footer{border-top:1px solid var(--border);padding:24px 0;text-align:center;font-size:11px;color:var(--text);letter-spacing:0.07em;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:600px){
+  .header-stats{gap:16px;}
+  .grid{grid-template-columns:1fr 1fr;gap:10px;}
+  .card-name{font-size:14px;}
+  .lb-name{font-size:18px;}
+  .lb-actions{flex-direction:column;}
+}
+@media(max-width:400px){.grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div id="lightbox">
+  <div class="lb-inner">
+    <div class="lb-header">
+      <div class="lb-meta">
+        <div class="lb-cat" id="lb-cat"></div>
+        <div class="lb-name" id="lb-name"></div>
+        <div class="lb-issuer" id="lb-issuer"></div>
+      </div>
+      <div class="lb-actions">
+        <a id="lb-drive-btn" class="lb-btn-drive" href="#" target="_blank" rel="noopener">
+          ↗ Open in Drive &amp; Download
+        </a>
+        <button class="lb-close" onclick="closeLB()">✕</button>
+      </div>
+    </div>
+    <div class="lb-viewer" id="lb-viewer"></div>
+    <div class="lb-nav">
+      <button class="lb-arrow" id="lb-prev" onclick="navLB(-1)">‹</button>
+      <span class="lb-counter" id="lb-counter"></span>
+      <button class="lb-arrow" id="lb-next" onclick="navLB(1)">›</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="header-row">
+      <div class="brand">
+        <div class="brand-icon">🏅</div>
+        <div>
+          <h1>Certificate <em>Vault</em></h1>
+          <p class="subtitle">Personal achievement archive</p>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat">
+          <div class="stat-n" id="stat-total">0</div>
+          <div class="stat-l">Certificates</div>
+        </div>
+        <div class="stat">
+          <div class="stat-n" id="stat-cats">0</div>
+          <div class="stat-l">Categories</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="setup-banner">
+    <div class="si">📋</div>
+    <div>
+      <h3>How to set this up — read once, then delete this banner</h3>
+      <p>
+        <strong style="color:var(--text);font-weight:500">Folder structure on your pendrive / laptop:</strong>
+        Keep this <code>certificates.html</code> file and a folder called <code>files/</code> together in the same place.
+        Put every PDF or image inside <code>files/</code>. Example: <code>files/science_olympiad_2024.pdf</code><br><br>
+        <strong style="color:var(--text);font-weight:500">Editing the list:</strong>
+        Open this file in Notepad (Windows) or TextEdit (Mac). Find <code>const certificates = [</code>.
+        For each certificate fill in <code>localFile</code> (the filename inside <code>files/</code>) and <code>driveLink</code>
+        (right-click file in Google Drive → Share → Anyone with the link → Copy link).<br><br>
+        <strong style="color:var(--text);font-weight:500">When done:</strong> delete this entire <code>&lt;div class="setup-banner"&gt;</code> block from the file.
+      </p>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search" placeholder="Search certificates…" oninput="render()">
+    </div>
+    <div class="filters" id="fbar">
+      <button class="fb on" onclick="setFilter('all',this)">All</button>
+    </div>
+  </div>
+
+  <div id="main"></div>
+
+  <footer>&copy; 2026 Rashen Ashmika Samarawickrama &bull; All rights reserved</footer>
+</div>
+
+<script>
+// ================================================================
+//  YOUR CERTIFICATES
+//
+//  localFile  — filename inside the files/ folder
+//               e.g. "science_olympiad_2024.pdf"
+//               Supports PDF, JPG, PNG.
+//               Use "" if you only have the Drive link.
+//
+//  driveLink  — shareable Google Drive link
+//               Right-click file in Drive → Share → Anyone with link → Copy link
+//               Use "" if you only have a local file.
+//
+//  category   — Academic | Science | Sports | Arts | Leadership | Other
+//  icon       — any single emoji
+// ================================================================
+
+const certificates = [
+
+  {
+    name:      "National Science Talent Search",
+    issuer:    "Department of Science & Technology",
+    category:  "Courses",
+    year:      "2024",
+    icon:      "🔬",
+    localFile: "file_name.pdf",
+    driveLink: "https://drive.google.com/file/d/REPLACE_ME/view?usp=sharing"
+  },
+  {
+    name:      "District Science Olympiad — Gold",
+    issuer:    "State Education Board",
+    category:  "Science",
+    year:      "2023",
+    icon:      "🥇",
+    localFile: "science_olympiad_gold_2023.pdf",
+    driveLink: "https://drive.google.com/file/d/REPLACE_ME/view?usp=sharing"
+  },
+  {
+    name:      "All Island Chess Championship",
+    issuer:    "National Chess Federation",
+    category:  "Sports",
+    year:      "2023",
+    icon:      "♟️",
+    localFile: "chess_championship_2023.pdf",
+    driveLink: "https://drive.google.com/file/d/REPLACE_ME/view?usp=sharing"
+  },
+  {
+    name:      "Academic Excellence Award",
+    issuer:    "School Name Here",
+    category:  "Academic",
+    year:      "2024",
+    icon:      "📜",
+    localFile: "academic_excellence_2024.pdf",
+    driveLink: "https://drive.google.com/file/d/REPLACE_ME/view?usp=sharing"
+  },
+  {
+    name:      "Inter-School Debate — Runner Up",
+    issuer:    "Lions Club Sri Lanka",
+    category:  "Leadership",
+    year:      "2022",
+    icon:      "🎤",
+    localFile: "debate_runner_up_2022.pdf",
+    driveLink: "https://drive.google.com/file/d/REPLACE_ME/view?usp=sharing"
+  },
+  {
+    name:      "Piano Grade 5",
+    issuer:    "Trinity College London",
+    category:  "Sports",
+    year:      "2022",
+    icon:      "🎹",
+    localFile: "piano_grade5_2022.pdf",
+    driveLink: "https://drive.google.com/file/d/REPLACE_ME/view?usp=sharing"
+  },
+
+  // ADD MORE BELOW — copy and paste this block:
+  // {
+  //   name:      "Certificate Name",
+  //   issuer:    "Issued By",
+  //   category:  "Science",
+  //   year:      "2024",
+  //   icon:      "🏆",
+  //   localFile: "filename.pdf",
+  //   driveLink: "https://drive.google.com/file/d/REPLACE_ME/view?usp=sharing"
+  // },
+
+];
+
+// ── category colours ─────────────────────────────────────────────
+const COLORS = {
+  Training:"#4a9eff", Courses:"#34d399", Examinations:"#ff6b4a",
+  Competitions:"#a78bfa", MUN:"#fb923c", ConfWorkshops:"#94a3b8", Sports: "#a3e635"
+};
+const col = c => COLORS[c] || COLORS.Other;
+
+// ── state ────────────────────────────────────────────────────────
+let filter = "all", lbIndex = 0, lbList = [];
+
+function setFilter(cat, btn) {
+  filter = cat;
+  document.querySelectorAll('.fb').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  render();
+}
+
+// ── render ───────────────────────────────────────────────────────
+function render() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  const main = document.getElementById('main');
+  const grouped = {};
+
+  certificates.forEach(c => {
+    if (filter !== 'all' && c.category !== filter) return;
+    if (q && ![c.name, c.issuer, c.category].some(s => s.toLowerCase().includes(q))) return;
+    (grouped[c.category] = grouped[c.category] || []).push(c);
+  });
+
+  lbList = Object.values(grouped).flat();
+
+  if (!lbList.length) {
+    main.innerHTML = `<div class="empty"><div class="ei">🔍</div><p>No certificates found.</p></div>`;
+    return;
+  }
+
+  let html = '';
+  for (const [cat, list] of Object.entries(grouped)) {
+    html += `<div class="section-head">${cat}</div><div class="grid">`;
+    list.forEach(c => {
+      const idx = lbList.indexOf(c);
+      const accent = col(c.category);
+      const hasLink = c.driveLink && !c.driveLink.includes('REPLACE_ME');
+      html += `
+      <div class="card" onclick="openLB(${idx})" style="animation-delay:${lbList.indexOf(c)*0.04}s">
+        <div class="card-bar" style="background:${accent}"></div>
+        <div class="card-body">
+          <div class="card-top">
+            <span class="cat-pill" style="color:${accent}">${c.category}</span>
+            <span class="card-year">${c.year}</span>
+          </div>
+          <span class="card-icon">${c.icon}</span>
+          <div class="card-name">${c.name}</div>
+          <div class="card-issuer">${c.issuer}</div>
+        </div>
+        <div class="card-footer">
+          <button class="btn-view" onclick="event.stopPropagation();openLB(${idx})">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            View
+          </button>
+          ${hasLink
+            ? `<a class="btn-drive" href="${c.driveLink}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Drive
+               </a>`
+            : `<span class="btn-drive" style="opacity:0.25;cursor:default;pointer-events:none">No link yet</span>`
+          }
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+  main.innerHTML = html;
+}
+
+// ── lightbox ─────────────────────────────────────────────────────
+function openLB(idx) {
+  lbIndex = idx; showLB();
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLB() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('lb-viewer').innerHTML = '';
+}
+
+function navLB(dir) {
+  lbIndex = Math.max(0, Math.min(lbList.length - 1, lbIndex + dir));
+  showLB();
+}
+
+function showLB() {
+  const c = lbList[lbIndex];
+  const accent = col(c.category);
+
+  document.getElementById('lb-cat').textContent   = c.category;
+  document.getElementById('lb-cat').style.color   = accent;
+  document.getElementById('lb-name').textContent  = c.name;
+  document.getElementById('lb-issuer').textContent= c.issuer + ' · ' + c.year;
+
+  const driveBtn = document.getElementById('lb-drive-btn');
+  const hasLink  = c.driveLink && !c.driveLink.includes('REPLACE_ME');
+  driveBtn.href         = hasLink ? c.driveLink : '#';
+  driveBtn.style.display= hasLink ? 'flex' : 'none';
+
+  document.getElementById('lb-counter').textContent = `${lbIndex + 1} of ${lbList.length}`;
+  document.getElementById('lb-prev').disabled = lbIndex === 0;
+  document.getElementById('lb-next').disabled = lbIndex === lbList.length - 1;
+
+  const viewer = document.getElementById('lb-viewer');
+  viewer.innerHTML = '';
+
+  if (!c.localFile) {
+    viewer.innerHTML = `<div class="lb-nofile">
+      <div class="nf-icon">📂</div>
+      <p>No local file set for this certificate.<br>
+      ${hasLink
+        ? `<a href="${c.driveLink}" target="_blank" rel="noopener">Open &amp; download from Google Drive →</a>`
+        : `Add the filename to <code>localFile</code> in the list.`
+      }</p></div>`;
+    return;
+  }
+
+  const src = 'files/' + c.localFile;
+  const ext = c.localFile.split('.').pop().toLowerCase();
+
+  if (ext === 'pdf') {
+    const el = document.createElement('embed');
+    el.src = src; el.type = 'application/pdf';
+    viewer.appendChild(el);
+  } else if (['jpg','jpeg','png','webp'].includes(ext)) {
+    const img = document.createElement('img');
+    img.src = src; img.alt = c.name;
+    img.onerror = () => {
+      viewer.innerHTML = `<div class="lb-nofile"><div class="nf-icon">⚠️</div>
+        <p>Could not load <code>${c.localFile}</code>.<br>
+        Make sure it is inside the <code>files/</code> folder next to this HTML file.</p></div>`;
+    };
+    viewer.appendChild(img);
+  } else {
+    viewer.innerHTML = `<div class="lb-nofile"><div class="nf-icon">📄</div>
+      <p>File type <code>.${ext}</code> can't be previewed inline.<br>
+      ${hasLink
+        ? `<a href="${c.driveLink}" target="_blank" rel="noopener">Open on Google Drive →</a>`
+        : 'Save your certificate as a PDF or JPG/PNG for inline preview.'
+      }</p></div>`;
+  }
+}
+
+// backdrop click + keyboard
+document.getElementById('lightbox').addEventListener('click', e => {
+  if (e.target === document.getElementById('lightbox')) closeLB();
+});
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('lightbox').classList.contains('open')) return;
+  if (e.key === 'Escape')     closeLB();
+  if (e.key === 'ArrowRight') navLB(1);
+  if (e.key === 'ArrowLeft')  navLB(-1);
+});
+
+// ── init ─────────────────────────────────────────────────────────
+function init() {
+  const cats = [...new Set(certificates.map(c => c.category))].sort();
+  const fbar = document.getElementById('fbar');
+  cats.forEach(cat => {
+    const b = document.createElement('button');
+    b.className = 'fb'; b.textContent = cat;
+    b.onclick = () => setFilter(cat, b);
+    fbar.appendChild(b);
+  });
+  document.getElementById('stat-total').textContent = certificates.length;
+  document.getElementById('stat-cats').textContent  = cats.length;
+  render();
+}
+init();
+</script>
+</body>
+</html>
